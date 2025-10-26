@@ -172,6 +172,12 @@ private let uploadInterval: TimeInterval = 30 // seconds
 - [ ] Posture score and trends
 - [ ] Reminder notifications
 
+## Authors
+-  Colin
+-  Enes
+-  Rithvik
+-  Varun 
+
 ## License
 
 MIT License - feel free to modify and distribute
