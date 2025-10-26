@@ -13,6 +13,12 @@ class MotionManager: ObservableObject {
     @Published var currentPitch: Double = 0.0
     @Published var currentRoll: Double = 0.0
     
+    // Calibration extremes
+    var calibrationMinPitch: Double = 0
+    var calibrationMaxPitch: Double = 0
+    var calibrationMinRoll: Double = 0
+    var calibrationMaxRoll: Double = 0
+    
     // Signal to tell the AppDelegate to capture the current attitude
     let setCalibrationSubject = PassthroughSubject<Void, Never>()
 }
@@ -120,10 +126,14 @@ struct CalibrationView: View {
     @State private var calibrationProgress: Double = 0.0
     private let totalMovementRequired: Double = 150.0
     
-    @State private var startPitch: Double = 0.0
-    @State private var startRoll: Double = 0.0
     @State private var lastPitch: Double = 0.0
     @State private var lastRoll: Double = 0.0
+    
+    // Track extremes for threshold calculation
+    @State private var minPitch: Double = .infinity
+    @State private var maxPitch: Double = -.infinity
+    @State private var minRoll: Double = .infinity
+    @State private var maxRoll: Double = -.infinity
     
     // Orbit particles
     @State private var orbitParticles: [OrbitParticle] = []
@@ -234,6 +244,12 @@ struct CalibrationView: View {
             // Action button
             Button(action: {
                 if isComplete {
+                    // Store extremes in MotionManager
+                    motionManager.calibrationMinPitch = minPitch
+                    motionManager.calibrationMaxPitch = maxPitch
+                    motionManager.calibrationMinRoll = minRoll
+                    motionManager.calibrationMaxRoll = maxRoll
+                    
                     withAnimation(.easeOut(duration: 0.2)) {
                         opacity = 0
                     }
@@ -278,8 +294,6 @@ struct CalibrationView: View {
         .background(.ultraThinMaterial)
         .opacity(opacity)
         .onAppear {
-            startPitch = motionManager.currentPitch
-            startRoll = motionManager.currentRoll
             lastPitch = motionManager.currentPitch
             lastRoll = motionManager.currentRoll
             startOrbitAnimation()
@@ -309,6 +323,12 @@ struct CalibrationView: View {
         
         if !isComplete && movementDelta > 0.5 {
             calibrationProgress = min(calibrationProgress + movementDelta, totalMovementRequired)
+            
+            // Track extremes for threshold calculation
+            minPitch = min(minPitch, motionManager.currentPitch)
+            maxPitch = max(maxPitch, motionManager.currentPitch)
+            minRoll = min(minRoll, motionManager.currentRoll)
+            maxRoll = max(maxRoll, motionManager.currentRoll)
             
             // Add new orbit particle
             let radius = Double.random(in: 50...110)

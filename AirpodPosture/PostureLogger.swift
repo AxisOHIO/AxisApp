@@ -19,8 +19,8 @@ final class PostureLogger {
     static let shared = PostureLogger()
     private init() {}
     
-    private let userId = "Mary"
-    private var postureData = PostureData(userId: "Mary", sessions: [])
+    private let userId = "Colin"
+    private var postureData = PostureData(userId: "Colin", sessions: [])
     
     private var lastUploadTime: Date = .distantPast
     private let uploadInterval: TimeInterval = 30

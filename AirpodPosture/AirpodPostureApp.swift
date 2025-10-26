@@ -194,8 +194,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let pitch = relativeAttitude.pitch * 180 / .pi
             let roll = relativeAttitude.roll * 180 / .pi
              
-            let forwardTiltThreshold = -25.0
-            let sideTiltThreshold = 20.0
+            // Calculate dynamic thresholds based on calibration extremes
+            let pitchRange = abs(motionManager.calibrationMaxPitch - motionManager.calibrationMinPitch)
+            let rollRange = abs(motionManager.calibrationMaxRoll - motionManager.calibrationMinRoll)
+            
+            // Use 40% of the range as threshold, with fallback to defaults
+            let forwardTiltThreshold = pitchRange > 10 ? -(pitchRange * 0.4) : -20.0
+            let sideTiltThreshold = rollRange > 10 ? (rollRange * 0.4) : 20.0
+            
             let isBadPosture = pitch < forwardTiltThreshold || abs(roll) > sideTiltThreshold
              
             // 2. Handle posture alerts
